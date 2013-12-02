@@ -1,12 +1,13 @@
 // GLOBALS
-var CANVAS_W     = document.body.offsetWidth,
+var CANVAS_W     = 350,
     CANVAS_H     = 500,
     canvas       = document.getElementById('invaders'),
     ctx          = canvas.getContext('2d'),
     heroBullets  = [],
     enemyBullets = [],
     enemies      = [],
-    loopInterval;
+    heroDead     = false,
+    loopInterval = null;
 
 // set up the canvas    
 canvas.width  = CANVAS_W;
@@ -19,15 +20,20 @@ canvas.height = CANVAS_H;
 var Invaders = function() {
     var invaders = this;
     
-    invaders.fps  = 20;
+    invaders.fps         = 20;
+    invaders.enemyCount  = 0;
+    invaders.enemyStartX = 0;
+    invaders.enemyStartY = 0;
     invaders.hero = new Hero();
-    invaders.enemyCount   = 40;
-    invaders.enemyStartX  = 10;
-    invaders.enemyStartY  = 1;
     
     // constructor
-    invaders.init = function() {
+    invaders.init = function(action) {
+        canvas.removeEventListener('click', invaders.init, false);
+        heroDead = heroDead ? !heroDead : heroDead;
         
+        invaders.enemyCount   = 40;
+        invaders.enemyStartX  = 10;
+        invaders.enemyStartY  = 1;
         invaders.hero.actions();
         
         // create new enemies
@@ -40,7 +46,16 @@ var Invaders = function() {
             }
         }
         
-        loopInterval = setInterval(invaders.gameLoop, 1000 / invaders.fps);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 24px courier';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click to start!', canvas.width / 2, canvas.height / 2);
+        
+        invaders.hero.draw();
+        invaders.enemyShot();
+        invaders.heroShot();
+        
+        canvas.addEventListener('click', invaders.gameLoop, false);
         
     };
     
@@ -71,8 +86,35 @@ var Invaders = function() {
         });    
     };
     
+    // game over stuff
+    invaders.gameOver = function(winLose) {
+        clearTimeout(loopInterval);
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = 'bold 24px courier';
+        ctx.textAlign = 'center';
+        
+        if (winLose === 'win') {
+            ctx.fillText('You Win!', canvas.width / 2, canvas.height / 2);    
+        } 
+        if (winLose === 'lose') {
+            ctx.fillText('You Died', canvas.width / 2, canvas.height / 2);
+        }
+        
+        ctx.font = 'bold 18px courier';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click to start over', canvas.width / 2, (canvas.height / 2) + 40);
+        
+        canvas.addEventListener('click', invaders.init, false);
+        
+    };
+    
     // The main game loop!
     invaders.gameLoop = function() {
+        canvas.removeEventListener('click', invaders.gameLoop, false);
+        
+        loopInterval = setTimeout(invaders.gameLoop, 1000/invaders.fps);
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         invaders.hero.draw();
@@ -113,6 +155,15 @@ var Invaders = function() {
         enemyBullets = enemyBullets.filter(function(bullet) {
             return bullet.active;    
         });
+        
+        // check if all enemies are dead
+        if (enemies.length == 0) {
+            invaders.gameOver('win');
+        }
+        
+        if (heroDead) {
+            invaders.gameOver('lose');
+        }
     };
     
     invaders.init();
@@ -172,9 +223,8 @@ var Hero = function() {
     }
     
     // the hero dies :(
-    hero.die = function() {
-        hero.draw('dead');
-        clearInterval(loopInterval);  
+    hero.die = function() {        
+        heroDead = true;
     };
 };
 
