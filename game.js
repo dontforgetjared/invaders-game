@@ -48,15 +48,13 @@ var Invaders = function() {
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = 'bold 24px courier';
+        ctx.fillStyle = '#FFFFFF';
         ctx.textAlign = 'center';
         ctx.fillText('Click to start!', canvas.width / 2, canvas.height / 2);
         
         invaders.hero.draw();
-        invaders.enemyShot();
-        invaders.heroShot();
         
         canvas.addEventListener('click', invaders.gameLoop, false);
-        
     };
     
     // Box collision detection
@@ -95,9 +93,11 @@ var Invaders = function() {
         ctx.textAlign = 'center';
         
         if (winLose === 'win') {
+            ctx.fillStyle = '#99FF99';
             ctx.fillText('You Win!', canvas.width / 2, canvas.height / 2);    
         } 
         if (winLose === 'lose') {
+            ctx.fillStyle = '#FFFFFF';
             ctx.fillText('You Died', canvas.width / 2, canvas.height / 2);
         }
         
@@ -106,7 +106,6 @@ var Invaders = function() {
         ctx.fillText('Click to start over', canvas.width / 2, (canvas.height / 2) + 40);
         
         canvas.addEventListener('click', invaders.init, false);
-        
     };
     
     // The main game loop!
@@ -167,7 +166,6 @@ var Invaders = function() {
     };
     
     invaders.init();
-    
 };
 
 /*
@@ -244,7 +242,7 @@ var Bullet = function(B) {
     
     // draw the bullet
     bullet.draw = function(x, y) {
-        var color = B.src === 'hero' ? 'blue' : 'red';
+        var color = B.src === 'hero' ? '#FFFF00' : '#FFCC00';
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.rect(x, y, bullet.w, bullet.h);
